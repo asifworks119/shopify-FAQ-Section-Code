@@ -1,0 +1,369 @@
+<section class="ctfaqs-section">
+  <div class="ctfaqs-container">
+    <div class="ctfaqs-left">
+      {% if section.settings.heading != blank %}
+        <h2 class="ctfaqs-heading">{{ section.settings.heading }}</h2>
+      {% endif %}
+
+      {% if section.settings.image != blank %}
+        <div class="ctfaqs-image-wrapper">
+          <img 
+            class="ctfaqs-image"
+            src="{{ section.settings.image | img_url: '600x' }}"
+            alt="{{ section.settings.image.alt | escape }}"
+            loading="lazy"
+          >
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="ctfaqs-right">
+      {% for block in section.blocks %}
+        {% if block.type == 'faq' %}
+          <div class="ctfaqs-item" data-faq-item {{ block.shopify_attributes }}>
+            <button class="ctfaqs-question-wrapper" aria-expanded="false">
+              <h3 class="ctfaqs-question">{{ block.settings.question }}</h3>
+              <span class="ctfaqs-chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+            </button>
+            <div class="ctfaqs-answer-wrapper">
+              <div class="ctfaqs-answer-inner">
+                <div class="ctfaqs-answer">
+                  {{ block.settings.answer }}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    // Initialize FAQ functionality
+    function initFAQs() {
+      const faqItems = document.querySelectorAll('[data-faq-item]');
+      
+      faqItems.forEach(item => {
+        const button = item.querySelector('.ctfaqs-question-wrapper');
+        const answerWrapper = item.querySelector('.ctfaqs-answer-wrapper');
+        
+        if (!button || !answerWrapper) return;
+
+        button.addEventListener('click', function() {
+          const isActive = item.classList.contains('ctfaqs-active');
+          
+          // Close all other FAQs (optional - remove these lines for multiple open FAQs)
+          faqItems.forEach(otherItem => {
+            if (otherItem !== item) {
+              otherItem.classList.remove('ctfaqs-active');
+              const otherButton = otherItem.querySelector('.ctfaqs-question-wrapper');
+              if (otherButton) {
+                otherButton.setAttribute('aria-expanded', 'false');
+              }
+            }
+          });
+          
+          // Toggle current FAQ
+          if (isActive) {
+            item.classList.remove('ctfaqs-active');
+            button.setAttribute('aria-expanded', 'false');
+          } else {
+            item.classList.add('ctfaqs-active');
+            button.setAttribute('aria-expanded', 'true');
+          }
+        });
+
+        // Keyboard accessibility
+        button.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            button.click();
+          }
+        });
+      });
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initFAQs);
+    } else {
+      initFAQs();
+    }
+
+    // Reinitialize when section is rendered in theme editor
+    if (window.Shopify && window.Shopify.designMode) {
+      document.addEventListener('shopify:section:load', initFAQs);
+    }
+  })();
+</script>
+
+<style>
+  .ctfaqs-section {
+    padding: 60px 20px;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  .ctfaqs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .ctfaqs-left {
+    position: sticky;
+    top: 100px;
+  }
+
+  .ctfaqs-heading {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 30px;
+    color: #000;
+  }
+
+  .ctfaqs-image-wrapper {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .ctfaqs-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ctfaqs-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ctfaqs-item {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .ctfaqs-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .ctfaqs-question-wrapper {
+    width: 100%;
+    padding: 20px 24px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    transition: background-color 0.3s ease;
+  }
+
+  .ctfaqs-question-wrapper:hover {
+    background-color: #f8f8f8;
+  }
+
+  .ctfaqs-question {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+    margin: 0;
+    flex: 1;
+  }
+
+  .ctfaqs-chevron {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+  }
+
+  .ctfaqs-chevron svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+  }
+
+  .ctfaqs-item.ctfaqs-active .ctfaqs-chevron {
+    transform: rotate(180deg);
+  }
+
+  .ctfaqs-answer-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+  }
+
+  .ctfaqs-answer-inner {
+    overflow: hidden;
+  }
+
+  .ctfaqs-item.ctfaqs-active .ctfaqs-answer-wrapper {
+    grid-template-rows: 1fr;
+    padding-top: 0;
+  }
+
+  .ctfaqs-answer {
+    color: #000;
+    font-size: 18px;
+    line-height: 1.6;
+    padding: 0 24px 24px 24px;
+  }
+
+  .ctfaqs-answer p {
+    margin: 0 0 12px 0;
+  }
+
+  .ctfaqs-answer p:last-child {
+    margin-bottom: 0;
+  }
+
+  .ctfaqs-answer ul,
+  .ctfaqs-answer ol {
+    margin: 12px 0;
+    padding-left: 24px;
+  }
+
+  .ctfaqs-answer li {
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 968px) {
+    .ctfaqs-container {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .ctfaqs-left {
+      position: static;
+    }
+
+    .ctfaqs-heading {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .ctfaqs-image-wrapper {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ctfaqs-section {
+      padding: 40px 16px;
+    }
+
+    .ctfaqs-heading {
+      font-size: 28px;
+    }
+
+    .ctfaqs-question {
+      font-size: 16px;
+    }
+
+    .ctfaqs-answer {
+      font-size: 14px;
+      padding: 0 20px 20px 20px;
+    }
+
+    .ctfaqs-question-wrapper {
+      padding: 16px 20px;
+    }
+  }
+</style>
+
+
+{% schema %}
+{
+  "name": "Custom FAQs",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "FAQs: Freakin' Awesome Questions"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#FDB913"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "What's your question?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>Your answer goes here. You can use rich text formatting.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom FAQs",
+      "blocks": [
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Am I getting the right contacts?",
+            "answer": "<p>Yes! We help you find the perfect contacts for your needs.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "What's your return policy?",
+            "answer": "<p>We offer a 30-day return policy on all unopened products.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Do you price match?",
+            "answer": "<p>Absolutely! We'll match any competitor's price.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
